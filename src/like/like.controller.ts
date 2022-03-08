@@ -23,7 +23,7 @@ export class LikeController {
     return 'all Likes';
   }
 
-  @Get('Likeid')
+  @Get('likeid')
   getLikeById() {
     return 'Like by id';
   }

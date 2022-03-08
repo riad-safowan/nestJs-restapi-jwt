@@ -10,29 +10,24 @@ import {
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
   @Column()
   first_name: string;
   @Column()
   last_name: string;
-  @Column()
-  image_url?: string;
+  @Column({ nullable: true })
+  image_url: string;
   @Column()
   password: string;
-  @Column()
+  @Column({ unique: true })
   email: string;
-  @Column({ length: 500 })
-  access_token: string;
-  @Column({ length: 300 })
-  refresh_token: string;
-  @Column()
-  user_type: string;
-
   @CreateDateColumn({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP(6)',
   })
   created_at: Date;
+  @Column()
+  user_type: string;
 
   @UpdateDateColumn({
     type: 'timestamp',
@@ -40,4 +35,7 @@ export class User {
     onUpdate: 'CURRENT_TIMESTAMP(6)',
   })
   updated_at: Date;
+  access_token: string;
+  @Column({ length: 500, nullable: true })
+  refresh_token: string;
 }
