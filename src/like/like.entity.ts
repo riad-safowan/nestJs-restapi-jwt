@@ -23,7 +23,6 @@ export class Like {
     default: () => 'CURRENT_TIMESTAMP(6)',
   })
   created_at: Date;
-
   @UpdateDateColumn({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP(6)',

@@ -4,19 +4,13 @@ import { UserModule } from './user/user.module';
 import { User } from './user/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostModule } from './post/post.module';
-import { CommentModule } from './comment/comment.module';
-import { LikeModule } from './like/auth.module';
-import { Posts } from './post/post.entity';
-import { Comment } from './comment/comment.entity';
-import { Like } from './like/like.entity';
+import { Likes, Posts, Comments } from './post/post.entity';
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
     PostModule,
-    CommentModule,
-    LikeModule,
 
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -25,7 +19,7 @@ import { Like } from './like/like.entity';
       username: 'root',
       password: '123456',
       database: 'nest',
-      entities: [User, Posts, Comment, Like],
+      entities: [User, Posts, Comments, Likes],
       synchronize: true,
     }),
   ],

@@ -5,6 +5,7 @@ import {
   UseGuards,
   Request,
   Get,
+  Param,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { use } from 'passport';
@@ -71,5 +72,26 @@ export class PostController {
       status: 201,
     };
     return response;
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('like/:id')
+  async likePost(@Request() req, @Param() params) {
+    this.postService.likePost(req.user.uid as number, params.id as number);
+    return;
+  }
+  @UseGuards(AuthGuard('jwt'))
+  @Post('comment/:id')
+  async addComment(
+    @Request() req,
+    @Param() params,
+    @Body() payload: PostRequest,
+  ) {
+    this.postService.addAComment(
+      req.user.uid as number,
+      params.id as number,
+      payload.text,
+    );
+    return;
   }
 }
