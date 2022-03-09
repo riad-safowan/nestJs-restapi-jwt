@@ -13,7 +13,7 @@ export class UserService {
   //   return this.userRepository.find();
   // }
 
-  async getOneById(id: string): Promise<User> {
+  async getOneById(id: number): Promise<User> {
     return await this.userRepository.findOneOrFail(id);
   }
 

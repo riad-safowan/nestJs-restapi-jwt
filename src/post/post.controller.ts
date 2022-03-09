@@ -1,8 +1,17 @@
-import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  Get,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { use } from 'passport';
 import { BaseResponse } from 'src/app.dto';
 import { UserService } from 'src/user/user.service';
-import { CreatePostResponse, PostRequest } from './post.dto';
+import { PostResponse, PostRequest } from './post.dto';
+import { Posts } from './post.entity';
 import { PostService } from './post.service';
 
 @Controller('post')
@@ -20,7 +29,7 @@ export class PostController {
       postRequest.text,
     );
     const user = await this.userService.getOneById(req.user.uid);
-    const responseData: CreatePostResponse = await {
+    const responseData: PostResponse = await {
       ...post,
       user_name: user.first_name + ' ' + user.last_name,
       user_image_url: user.image_url,
@@ -28,6 +37,36 @@ export class PostController {
     };
     const response: BaseResponse = {
       data: responseData,
+      message: 'success',
+      status: 201,
+    };
+    return response;
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('get-all')
+  async getAllPost(@Request() req) {
+    const posts = await this.postService.getAllPost();
+
+    const responsesData: PostResponse[] = [];
+
+    for (const post of posts) {
+      const user = await this.userService.getOneById(post.user_id);
+      const name = user.first_name + ' ' + user.last_name;
+      const is_liked = false;
+
+      const responseData: PostResponse = {
+        ...post,
+        user_name: user.first_name + ' ' + user.last_name,
+        user_image_url: user.image_url,
+        is_liked: false,
+      };
+
+      responsesData.push(responseData);
+    }
+
+    const response: BaseResponse = {
+      data: responsesData,
       message: 'success',
       status: 201,
     };

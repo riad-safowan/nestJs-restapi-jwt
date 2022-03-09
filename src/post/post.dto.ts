@@ -2,7 +2,7 @@ export type PostRequest = {
   text: string;
 };
 
-export type CreatePostResponse = {
+export type PostResponse = {
   id: number;
   text: string;
   user_id: number;

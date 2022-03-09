@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
 import { LikeModule } from './like/auth.module';
-import { Post } from './post/post.entity';
+import { Posts } from './post/post.entity';
 import { Comment } from './comment/comment.entity';
 import { Like } from './like/like.entity';
 
@@ -25,7 +25,7 @@ import { Like } from './like/like.entity';
       username: 'root',
       password: '123456',
       database: 'nest',
-      entities: [User, Post, Comment, Like],
+      entities: [User, Posts, Comment, Like],
       synchronize: true,
     }),
   ],
