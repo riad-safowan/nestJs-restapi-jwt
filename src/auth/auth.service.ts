@@ -61,7 +61,13 @@ export class AuthService {
     return await this.userRepository.save(user);
   }
 
-  refreshToken() {}
+  async refreshToken(userId: number): Promise<TokenModel> {
+    const user = await this.userRepository.findOne(userId);
+    const token = await this.generateToken(user);
+    user.refresh_token = token.refresh_token;
+    await this.userRepository.save(user);
+    return token;
+  }
 
   async logout(uid: number) {
     const user = await this.userRepository.findOne(uid);

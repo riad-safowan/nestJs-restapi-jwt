@@ -13,15 +13,9 @@ export class UserService {
   //   return this.userRepository.find();
   // }
 
-  // async getOneById(id: string): Promise<User> {
-  //   try {
-  //     const user = await this.userRepository.findOneOrFail(id);
-  //     return user;
-  //   } catch (error) {
-  //     // not found
-  //     throw error;
-  //   }
-  // }
+  async getOneById(id: string): Promise<User> {
+    return await this.userRepository.findOneOrFail(id);
+  }
 
   // createUser(name: string): Promise<User> {
   //   const newUser = this.userRepository.create({ name: name });

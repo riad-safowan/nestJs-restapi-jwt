@@ -10,16 +10,16 @@ import {
 @Entity()
 export class Post {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
   @Column({ length: 2000 })
   text: string;
   @Column()
   user_id: number;
-  @Column()
+  @Column({ nullable: true })
   image_url?: string;
-  @Column()
+  @Column({ default: 0 })
   likes: number;
-  @Column()
+  @Column({ default: 0 })
   comments: number;
   @CreateDateColumn({
     type: 'timestamp',
