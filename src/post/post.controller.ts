@@ -6,13 +6,18 @@ import {
   Request,
   Get,
   Param,
+  UseInterceptors,
+  UploadedFile,
+  Res,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { use } from 'passport';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { join } from 'path';
+import { of } from 'rxjs/internal/observable/of';
 import { BaseResponse } from 'src/app.dto';
 import { UserService } from 'src/user/user.service';
 import { PostResponse, PostRequest } from './post.dto';
-import { Posts } from './post.entity';
 import { PostService } from './post.service';
 
 @Controller('post')
@@ -29,19 +34,19 @@ export class PostController {
       req.user['uid'],
       postRequest.text,
     );
-    const user = await this.userService.getOneById(req.user.uid);
-    const responseData: PostResponse = await {
-      ...post,
-      user_name: user.first_name + ' ' + user.last_name,
-      user_image_url: user.image_url,
-      is_liked: false,
-    };
-    const response: BaseResponse = {
-      data: responseData,
-      message: 'success',
-      status: 201,
-    };
-    return response;
+    // const user = await this.userService.getOneById(req.user.uid);
+    // const responseData: PostResponse = await {
+    //   ...post,
+    //   user_name: user.first_name + ' ' + user.last_name,
+    //   user_image_url: user.image_url,
+    //   is_liked: false,
+    // };
+    // const response: BaseResponse = {
+    //   data: responseData,
+    //   message: 'success',
+    //   status: 201,
+    // };
+    return await this.getAllPost(req);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -60,7 +65,10 @@ export class PostController {
         ...post,
         user_name: user.first_name + ' ' + user.last_name,
         user_image_url: user.image_url,
-        is_liked: false,
+        is_liked: await this.postService.isLiked(
+          req.user.uid as number,
+          post.id,
+        ),
       };
 
       responsesData.push(responseData);
@@ -77,8 +85,16 @@ export class PostController {
   @UseGuards(AuthGuard('jwt'))
   @Post('like/:id')
   async likePost(@Request() req, @Param() params) {
-    this.postService.likePost(req.user.uid as number, params.id as number);
-    return;
+    const isLiked = await this.postService.likePost(
+      req.user.uid as number,
+      params.id as number,
+    );
+    const response: BaseResponse = {
+      data: { isLiked: isLiked },
+      message: 'success',
+      status: 201,
+    };
+    return response;
   }
   @UseGuards(AuthGuard('jwt'))
   @Post('comment/:id')
@@ -87,11 +103,43 @@ export class PostController {
     @Param() params,
     @Body() payload: PostRequest,
   ) {
-    this.postService.addAComment(
+    const text = await this.postService.addAComment(
       req.user.uid as number,
       params.id as number,
       payload.text,
     );
-    return;
+    const response: BaseResponse = {
+      data: { text: text },
+      message: 'success',
+      status: 201,
+    };
+    return response;
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('upload-image/:id')
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './image-server/post-image',
+        filename: (req, file, cd) => {
+          cd(null, (req.params['id'] as string) + '.jpg');
+        },
+      }),
+    }),
+  )
+  async uploadPostImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('id') id: number,
+  ) {
+    const filePath = file.path.replace('image-server\\post-image\\', '');
+    return await this.postService.updatePostImageUrl(id, filePath);
+  }
+
+  @Get('post-image/:name')
+  getPostImage(@Param('name') name, @Res() res) {
+    return of(
+      res.sendFile(join(process.cwd(), './image-server/post-image/' + name)),
+    );
   }
 }

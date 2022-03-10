@@ -24,12 +24,6 @@ export class AuthController {
     return this.authService.login(loginUserDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  @Get('hello')
-  getHello(@Request() req) {
-    return req.user.email;
-  }
-
   @UseGuards(AuthGuard('jwt-refresh'))
   @Get('refresh-token')
   refreshToken(@Request() req) {
@@ -39,6 +33,6 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @Post('logout')
   logout(@Request() req) {
-    this.authService.logout(req.user.id);
+    this.authService.logout(req.user.uid);
   }
 }

@@ -7,6 +7,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { type } from 'os';
 import { TokenModel } from './auth.dto';
+import { getProfileImageUrl } from 'src/user/user.service';
 
 @Injectable({})
 export class AuthService {
@@ -44,12 +45,13 @@ export class AuthService {
 
     newUser.access_token = token.access_token;
     newUser.refresh_token = token.refresh_token;
+    newUser.image_url = getProfileImageUrl(newUser.image_url);
 
-    return user;
+    return newUser;
   }
 
   async login(payload: LoginUserDto): Promise<User> {
-    const user = await this.userRepository.findOne({ email: payload.email });
+    let user = await this.userRepository.findOne({ email: payload.email });
     if (!user || !(await bcrypt.compare(payload.password, user.password))) {
       throw new BadRequestException('invalid email or password');
     }
@@ -57,8 +59,9 @@ export class AuthService {
     const token = await this.generateToken(user);
     user.access_token = token.access_token;
     user.refresh_token = token.refresh_token;
-
-    return await this.userRepository.save(user);
+    user = await this.userRepository.save(user);
+    user.image_url = getProfileImageUrl(user.image_url);
+    return user;
   }
 
   async refreshToken(userId: number): Promise<TokenModel> {

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { BASE_URL } from 'src/const';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 
@@ -27,4 +28,17 @@ export class UserService {
   //   await this.userRepository.remove(user);
   //   return user;
   // }
+  async updateUserImageUrl(id: number, filePath: string): Promise<User> {
+    let user = await this.userRepository.findOneOrFail(id);
+    user.image_url = filePath;
+    user = await this.userRepository.save(user);
+    user.image_url = getProfileImageUrl(user.image_url);
+    return user;
+  }
+}
+
+export function getProfileImageUrl(name: string): string {
+  if (name) {
+    return BASE_URL + '/user/profile-image/' + name;
+  } else return null;
 }
