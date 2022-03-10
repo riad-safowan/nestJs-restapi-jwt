@@ -13,17 +13,13 @@ import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { join } from 'path';
-import { of } from 'rxjs';
+import { of } from 'rxjs/internal/observable/of';
+import { BaseResponse } from 'src/app.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
-
-  @Get('update')
-  async updateUser() {
-    return 'update user';
-  }
 
   @UseGuards(AuthGuard('jwt'))
   @Post('upload-image')
@@ -42,7 +38,13 @@ export class UserController {
     @Request() req,
   ) {
     const filePath = file.path.replace('image-server\\profile-image\\', '');
-    return await this.userService.updateUserImageUrl(req.user.uid, filePath);
+
+    const response: BaseResponse = {
+      data: await this.userService.updateUserImageUrl(req.user.uid, filePath),
+      message: 'success',
+      status: 201,
+    };
+    return response;
   }
 
   @Get('profile-image/:name')

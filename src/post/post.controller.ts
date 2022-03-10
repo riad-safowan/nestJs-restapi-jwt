@@ -133,7 +133,12 @@ export class PostController {
     @Param('id') id: number,
   ) {
     const filePath = file.path.replace('image-server\\post-image\\', '');
-    return await this.postService.updatePostImageUrl(id, filePath);
+    const response: BaseResponse = {
+      data: await this.postService.updatePostImageUrl(id, filePath),
+      message: 'success',
+      status: 201,
+    };
+    return response;
   }
 
   @Get('post-image/:name')
