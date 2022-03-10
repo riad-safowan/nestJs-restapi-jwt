@@ -121,7 +121,7 @@ export class PostController {
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
-        destination: './image-server/post-image',
+        destination: './image_server/post_image',
         filename: (req, file, cd) => {
           cd(null, (req.params['id'] as string) + '.jpg');
         },
@@ -132,7 +132,7 @@ export class PostController {
     @UploadedFile() file: Express.Multer.File,
     @Param('id') id: number,
   ) {
-    const filePath = file.path.replace('image-server\\post-image\\', '');
+    const filePath = file.path.replace('image_server\\post_image\\', '');
     const response: BaseResponse = {
       data: await this.postService.updatePostImageUrl(id, filePath),
       message: 'success',
@@ -144,7 +144,7 @@ export class PostController {
   @Get('post-image/:name')
   getPostImage(@Param('name') name, @Res() res) {
     return of(
-      res.sendFile(join(process.cwd(), './image-server/post-image/' + name)),
+      res.sendFile(join(process.cwd(), './image_server/post_image/' + name)),
     );
   }
 }

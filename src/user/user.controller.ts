@@ -26,7 +26,7 @@ export class UserController {
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
-        destination: './image-server/profile-image',
+        destination: './image_server/profile_image',
         filename: (req, file, cd) => {
           cd(null, (req.user['uid'] as string) + '.jpg');
         },
@@ -37,7 +37,7 @@ export class UserController {
     @UploadedFile() file: Express.Multer.File,
     @Request() req,
   ) {
-    const filePath = file.path.replace('image-server\\profile-image\\', '');
+    const filePath = file.path.replace('image_server\\profile_image\\', '');
 
     const response: BaseResponse = {
       data: await this.userService.updateUserImageUrl(req.user.uid, filePath),
@@ -50,7 +50,7 @@ export class UserController {
   @Get('profile-image/:name')
   getProfileImage(@Param('name') name, @Res() res) {
     return of(
-      res.sendFile(join(process.cwd(), './image-server/profile-image/' + name)),
+      res.sendFile(join(process.cwd(), './image_server/profile_image/' + name)),
     );
   }
 }

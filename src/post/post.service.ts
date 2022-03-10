@@ -94,6 +94,6 @@ export class PostService {
 
 export function getPostImageUrl(path: string): string {
   if (path) {
-    return BASE_URL + '/post`/post-image/' + path;
+    return BASE_URL + '/post/post-image/' + path;
   } else return null;
 }

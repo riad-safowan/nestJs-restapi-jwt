@@ -9,7 +9,7 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: 'RIAD',
+      secretOrKey: process.env.AT_SECRET,
     });
   }
   async validate(payload: any) {
@@ -21,14 +21,13 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 }
 
-
 @Injectable()
 export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: 'SAFOWAN',
+      secretOrKey: process.env.RT_SECRET,
       passReqToCallback: true,
     });
   }
