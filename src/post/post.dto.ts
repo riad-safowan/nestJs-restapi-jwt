@@ -15,3 +15,12 @@ export type PostResponse = {
   comments: number;
   is_liked: boolean;
 };
+
+export type CommentResponse = {
+  post_id: number;
+  user_id: number;
+  user_name: string;
+  user_img_url: string;
+  text: string;
+  comment_id: number;
+};

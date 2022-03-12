@@ -46,7 +46,7 @@ export class UserController {
     };
     return response;
   }
-
+ 
   @Get('profile-image/:name')
   getProfileImage(@Param('name') name, @Res() res) {
     return of(

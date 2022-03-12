@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { type } from 'os';
-import { TokenModel } from './auth.dto';
+import { SignInResponse, TokenModel } from './auth.dto';
 import { getProfileImageUrl } from 'src/user/user.service';
 
 @Injectable({})
@@ -16,7 +16,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async createUser(payload: SignupUserDto): Promise<User> {
+  async createUser(payload: SignupUserDto): Promise<SignInResponse> {
     if (await this.isUserExist(payload.email)) {
       throw new BadRequestException('Email is occupied');
     }
@@ -47,21 +47,39 @@ export class AuthService {
     newUser.refresh_token = token.refresh_token;
     newUser.image_url = getProfileImageUrl(newUser.image_url);
 
-    return newUser;
+    const response: SignInResponse = {
+      id: user.id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      image_url: user.image_url,
+      email: user.email,
+      access_token: user.access_token,
+      refresh_token: user.refresh_token,
+    };
+    return response;
   }
 
-  async login(payload: LoginUserDto): Promise<User> {
+  async login(payload: LoginUserDto): Promise<SignInResponse> {
     let user = await this.userRepository.findOne({ email: payload.email });
     if (!user || !(await bcrypt.compare(payload.password, user.password))) {
       throw new BadRequestException('invalid email or password');
     }
-
     const token = await this.generateToken(user);
     user.access_token = token.access_token;
     user.refresh_token = token.refresh_token;
     user = await this.userRepository.save(user);
     user.image_url = getProfileImageUrl(user.image_url);
-    return user;
+    const response: SignInResponse = {
+      id: user.id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      image_url: user.image_url,
+      email: user.email,
+      access_token: user.access_token,
+      refresh_token: user.refresh_token,
+    };
+
+    return response;
   }
 
   async refreshToken(userId: number): Promise<TokenModel> {

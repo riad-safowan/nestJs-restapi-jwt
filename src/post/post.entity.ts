@@ -10,7 +10,7 @@ import {
 export class Posts {
   @PrimaryGeneratedColumn()
   id: number;
-  @Column({ length: 2000 })
+  @Column({ length: 16000 })
   text: string;
   @Column()
   user_id: number;
@@ -67,7 +67,7 @@ export class Comments {
   post_id: number;
   @Column()
   user_id: number;
-  @Column({ length: 500 })
+  @Column({ length: 5000 })
   text: string;
   @CreateDateColumn({
     type: 'timestamp',

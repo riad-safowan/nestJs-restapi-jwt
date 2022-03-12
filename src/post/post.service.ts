@@ -1,14 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { response } from 'express';
 import { retry } from 'rxjs';
 import { BASE_URL } from 'src/const';
+import { User } from 'src/user/user.entity';
+import { getProfileImageUrl } from 'src/user/user.service';
 import { Repository } from 'typeorm';
+import { CommentResponse } from './post.dto';
 import { Comments, Likes, Posts } from './post.entity';
 
 @Injectable({})
 export class PostService {
   constructor(
     @InjectRepository(Posts) private readonly postRepository: Repository<Posts>,
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Likes) private readonly likeRepository: Repository<Likes>,
     @InjectRepository(Comments)
     private readonly commentRepository: Repository<Comments>,
@@ -30,7 +35,7 @@ export class PostService {
   }
 
   async getAllPost(): Promise<Posts[]> {
-    return await this.postRepository.find();
+    return await this.postRepository.find({ order: { id: 'DESC' },});
   }
 
   async likePost(userid: number, postid: number): Promise<boolean> {
@@ -89,6 +94,26 @@ export class PostService {
     post.comments = post.comments + 1;
     this.postRepository.save(post);
     return text;
+  }
+  async getCommentsByPostId(post_id: number): Promise<CommentResponse[]> {
+    const comments = await this.commentRepository.find({
+      where: { post_id: post_id },
+    });
+
+    const responses: CommentResponse[] = [];
+    for (const comment of comments) {
+      const user = await this.userRepository.findOne(comment.user_id);
+      const response: CommentResponse = {
+        post_id: post_id,
+        user_id: comment.user_id,
+        user_name: user.first_name + ' ' + user.last_name,
+        user_img_url: getProfileImageUrl(user.image_url),
+        text: comment.text,
+        comment_id: comment.id,
+      };
+      responses.push(response);
+    }
+    return responses;
   }
 }
 

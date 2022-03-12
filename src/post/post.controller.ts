@@ -16,9 +16,9 @@ import { diskStorage } from 'multer';
 import { join } from 'path';
 import { of } from 'rxjs/internal/observable/of';
 import { BaseResponse } from 'src/app.dto';
-import { UserService } from 'src/user/user.service';
+import { getProfileImageUrl, UserService } from 'src/user/user.service';
 import { PostResponse, PostRequest } from './post.dto';
-import { PostService } from './post.service';
+import { getPostImageUrl, PostService } from './post.service';
 
 @Controller('post')
 export class PostController {
@@ -46,7 +46,21 @@ export class PostController {
     //   message: 'success',
     //   status: 201,
     // };
-    return await this.getAllPost(req);
+    const user = await this.userService.getOneById(post.user_id);
+    const name = user.first_name + ' ' + user.last_name;
+    const postResponse: PostResponse = {
+      ...post,
+      image_url: getPostImageUrl(post.image_url),
+      user_name: name,
+      user_image_url: getProfileImageUrl(user.image_url),
+      is_liked: false,
+    };
+    const response: BaseResponse = {
+      data: postResponse,
+      message: 'success',
+      status: 201,
+    };
+    return response;
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -59,12 +73,12 @@ export class PostController {
     for (const post of posts) {
       const user = await this.userService.getOneById(post.user_id);
       const name = user.first_name + ' ' + user.last_name;
-      const is_liked = false;
 
       const responseData: PostResponse = {
         ...post,
-        user_name: user.first_name + ' ' + user.last_name,
-        user_image_url: user.image_url,
+        image_url: getPostImageUrl(post.image_url),
+        user_name: name,
+        user_image_url: getProfileImageUrl(user.image_url),
         is_liked: await this.postService.isLiked(
           req.user.uid as number,
           post.id,
@@ -103,13 +117,19 @@ export class PostController {
     @Param() params,
     @Body() payload: PostRequest,
   ) {
-    const text = await this.postService.addAComment(
+    await this.postService.addAComment(
       req.user.uid as number,
       params.id as number,
       payload.text,
     );
+    return await this.getCommentsByPostId(params);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('comments/:id')
+  async getCommentsByPostId(@Param() params) {
     const response: BaseResponse = {
-      data: { text: text },
+      data: await this.postService.getCommentsByPostId(params.id as number),
       message: 'success',
       status: 201,
     };
@@ -133,8 +153,18 @@ export class PostController {
     @Param('id') id: number,
   ) {
     const filePath = file.path.replace('image_server\\post_image\\', '');
+    const post = await this.postService.updatePostImageUrl(id, filePath);
+    const user = await this.userService.getOneById(post.user_id);
+    const name = user.first_name + ' ' + user.last_name;
+    const postResponse: PostResponse = {
+      ...post,
+      image_url: getPostImageUrl(post.image_url),
+      user_name: name,
+      user_image_url: getProfileImageUrl(user.image_url),
+      is_liked: false,
+    };
     const response: BaseResponse = {
-      data: await this.postService.updatePostImageUrl(id, filePath),
+      data: postResponse,
       message: 'success',
       status: 201,
     };
